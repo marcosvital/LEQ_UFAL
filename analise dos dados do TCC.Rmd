@@ -1,0 +1,119 @@
+---
+title: "Análise de dados do TCC *Biogeografia do gênero Erythemis: um teste da regra de Baergmann*"
+author: "Cibele Rosas Teixeira de Melo, Marcos Vinícius Carneiro Vital"
+date: "22 de maio de 2017"
+output: html_document
+---
+
+##Apresentação
+
+Este documento contem o script e resultados da análise de dados do TCC, e funciona como um registro reproduzível de todas as análises realizadas.
+
+***
+
+##Importação dos dados
+
+Todos os dados utilizados foram condensados em uma única planilha:
+
+```{r}
+dados<-read.table("dados_cibele.txt", h=T, sep="\t")
+
+summary(dados)
+
+attach(dados)
+```
+
+***
+
+##Primeira análise, todas as espécies
+
+Nesta primeira análise, vamos explorar os dados usando os dados de todas as espécies. É possível, porém, que as duas espécies que possuem distribuição mais restrita ao norte (simplicicolis e collocata) possam gerar ruído nas análises, uma vez que sua distribuição não ultrapassa a linha do equador, diferente de todas as demais.
+
+**Latitude mínima**
+
+```{r}
+plot(Lat..Min.pontos~Tamanho, pch=16, las=1, xlab="Tamanho corporal (cm)", ylab="Latitude mínima")
+```
+
+**Latitude máxima**
+
+```{r}
+plot(Lat..Max.pontos~Tamanho, pch=16, las=1, xlab="Tamanho corporal (cm)", ylab="Latitude máxima")
+```
+
+**Amplitude da latitude**
+
+```{r}
+plot(Diferença~Tamanho, pch=16, las=1, xlab="Tamanho da asa posterior (cm)", ylab="Amplitude da latitude")
+```
+
+Para a variação total da latitude, podemos manter todas as espécies e seguir com o teste de hipóteses nortmalmente! Não há por que retirar as duas espécies com distribuição diferente nesta análise.
+
+```{r}
+resultado.amplitude<-lm(Diferença~Tamanho)
+
+summary(resultado.amplitude)
+```
+
+Existe uma relação clara, estatisticamente significativa, do tamanho corporal afetando a amplitude da latitude da distribuição. Cada cm a mais no tamanho da asa posterior da espécie gera um aumento médio de 2.9 graus decimais na amplitude da distribuição. O coeficiente de determinação foi de 0.55.
+
+```{r}
+plot(Diferença~Tamanho, pch=16, las=1, xlab="Tamanho da asa posterior (cm)", ylab="Amplitude da latitude")
+
+abline(resultado.amplitude, col="red", lty=2)
+```
+
+***
+
+##Segunda análise, apenas as "neotropicais"
+
+Agora vamos seguir para avaliar de maneira direta a regra de Bergmann. Como explicado anteriormente, vamos remover duas espécies das análises.
+
+**Re-ajustando os dados**
+
+```{r}
+detach(dados)
+
+dados.novos<-dados[c(-3, -9),]
+
+dados.novos
+
+attach(dados.novos)
+```
+
+**Latitude mínima**
+
+A análise:
+
+```{r}
+resultado.latmin<-lm(Lat..Min.pontos~Tamanho)
+summary(resultado.latmin)
+```
+
+Aqui não temos uma relação estatisticamente significativa.
+
+O gráfico:
+
+```{r}
+plot(Lat..Min.pontos~Tamanho, pch=16, las=1, xlab="Tamanho corporal (cm)", ylab="Latitude mínima")
+```
+
+
+
+**Latitude máxima**
+
+A análise:
+
+```{r}
+resultado.latmax<-lm(Lat..Max.pontos~Tamanho)
+summary(resultado.latmax)
+```
+
+E aqui novamente temos um efeito significativo. Em média, cada cm de tamanho implica num aumento de 2.1 graus decimais na latitude máxima.
+
+```{r}
+plot(Lat..Max.pontos~Tamanho, pch=16, las=1, xlab="Tamanho corporal (cm)", ylab="Latitude máxima")
+
+abline(resultado.latmax, col="red", lty=2)
+```
+
